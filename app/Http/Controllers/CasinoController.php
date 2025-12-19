@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\DailyBonusService;
 use Illuminate\Http\Request;
 
 class CasinoController extends Controller
 {
     // Can be altered if needed
-    private array $symbols = ['🍒', '🍋', '🔔', '⭐', '7️⃣'];
+    private array $symbols = ['cherry', 'lemon', 'bell', 'star', 'seven'];
 
-    public function spin(Request $request)
+    public function spin(Request $request): \Illuminate\Http\JsonResponse
     {
-        // Exploit it! No necessary checks!
-        $userId  = (int) $request->input('user_id', 0);      // No purpose rn, perhaps could be used later
-        $balance = (int) $request->input('balance', 1000);   // remove it later
+        // Must be secured by personal_access_token later
+        $userId  = (int) $request->input('user_id', 0);
+        $balance = (int) $request->input('balance', 1000);
         $bet     = (int) $request->input('bet', 0);
 
         // Simple juxtaposition
@@ -50,6 +51,15 @@ class CasinoController extends Controller
             'payout'        => $payout,
             'balance_before'=> $balance,
             'balance_after' => $balanceAfter,
+        ]);
+    }
+
+    public function bonus(Request $request, DailyBonusService $service): \Illuminate\Http\JsonResponse
+    {
+        $bonus = $service->claim($request->user()->id);
+
+        return response()->json([
+            'bonus' => $bonus,
         ]);
     }
 

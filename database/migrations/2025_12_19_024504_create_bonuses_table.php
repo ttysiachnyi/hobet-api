@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bonuses', function (Blueprint $table) {
-            $table->foreignId('user_id')->primary()->constrained()->cascadeOnDelete();
+            $table->id('user_id')->primary();
             $table->unsignedInteger('streak')->default(0);
             $table->unsignedInteger('bonus')->default(0);
             $table->enum('status', ['received', 'inactive'])->default('inactive');

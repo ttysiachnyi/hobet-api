@@ -56,12 +56,17 @@ class CasinoController extends Controller
 
     public function bonus(Request $request, DailyBonusService $service): \Illuminate\Http\JsonResponse
     {
-        $bonus = $service->claim($request->user()->id);
+        $userId = (int) $request->input('user_id', 0);
+        if ($userId <= 0) {
+            return response()->json(['error' => 'user_id is required'], 400);
+        }
 
-        return response()->json([
-            'bonus' => $bonus,
-        ]);
+        $bonus = $service->claim($userId);
+
+        return response()->json(['user_id' => $userId, 'bonus' => $bonus]);
     }
+
+
 
     private function randomSymbol(): string
     {

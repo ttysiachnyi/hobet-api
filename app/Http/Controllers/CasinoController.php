@@ -12,24 +12,23 @@ class CasinoController extends Controller
 
     public function spin(Request $request): \Illuminate\Http\JsonResponse
     {
-        // Must be secured by personal_access_token later
-        $userId  = (int) $request->input('user_id', 0);
+        // Takes userId from middleware
+        $userId = (int) $request->attributes->get('auth_user_id', 0);
+
+        $bodyUserId = (int) $request->input('user_id', 0);
+        if ($bodyUserId !== 0 && $bodyUserId !== $userId) {
+            return response()->json(['error' => 'user_id mismatch'], 403);
+        }
+
         $balance = (int) $request->input('balance', 1000);
         $bet     = (int) $request->input('bet', 0);
 
-        // Simple juxtaposition
         if ($bet <= 0) {
             return response()->json(['error' => 'Bet must be positive'], 400);
         }
 
-        // Spin
-        $reels = [
-            $this->randomSymbol(),
-            $this->randomSymbol(),
-            $this->randomSymbol(),
-        ];
+        $reels = [$this->randomSymbol(), $this->randomSymbol(), $this->randomSymbol()];
 
-        // 3 identical slots - x10, 2 identical ones - x2, otherwise 0
         $payout = 0;
         $winType = 'none';
 
@@ -44,15 +43,16 @@ class CasinoController extends Controller
         $balanceAfter = $balance - $bet + $payout;
 
         return response()->json([
-            'user_id'       => $userId,
-            'bet'           => $bet,
-            'reels'         => $reels,
-            'win_type'      => $winType,
-            'payout'        => $payout,
-            'balance_before'=> $balance,
-            'balance_after' => $balanceAfter,
+            'user_id'        => $userId,
+            'bet'            => $bet,
+            'reels'          => $reels,
+            'win_type'       => $winType,
+            'payout'         => $payout,
+            'balance_before' => $balance,
+            'balance_after'  => $balanceAfter,
         ]);
     }
+
 
     public function bonus(Request $request, DailyBonusService $service): \Illuminate\Http\JsonResponse
     {

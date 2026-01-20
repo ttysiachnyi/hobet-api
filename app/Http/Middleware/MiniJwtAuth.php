@@ -51,7 +51,11 @@ class MiniJwtAuth
             return response()->json(['error' => 'user_id missing in token'], 401);
         }
 
+        // NEW: balance is also taken from token
+        $balance = (int)($payload['balance'] ?? 0);
+
         $request->attributes->set('auth_user_id', $userId);
+        $request->attributes->set('auth_balance', $balance);
 
         return $next($request);
     }
